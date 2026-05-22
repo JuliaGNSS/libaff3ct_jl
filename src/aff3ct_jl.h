@@ -108,6 +108,31 @@ aff3ct_decoder_t aff3ct_viterbi_decoder_create(int K, int N,
 int  aff3ct_viterbi_decode(aff3ct_decoder_t dec, const float* Y_N, int* V_K);
 void aff3ct_viterbi_decoder_destroy(aff3ct_decoder_t dec);
 
+/* ── Feedforward convolutional: encoder ─────────────────────────── */
+
+/* Stand-alone feedforward convolutional encoder (non-systematic),
+ * e.g. Galileo E1B with poly = {0171, 0133}. Trellis is always
+ * terminated (tail bits appended).
+ *
+ * Constraint: N must equal n_poly * (K + n_ff), where
+ *   n_poly = poly_len, n_ff = floor(log2(max(poly))).
+ *
+ * poly: generator polynomials in octal (rate = 1/poly_len), required.
+ * poly_len: number of polynomials (>= 2). */
+aff3ct_encoder_t aff3ct_conv_encoder_create(int K, int N,
+                                             const int* poly, int poly_len);
+int  aff3ct_conv_encode(aff3ct_encoder_t enc, const int* U_K, int* X_N);
+void aff3ct_conv_encoder_destroy(aff3ct_encoder_t enc);
+
+/* ── Viterbi: decoder for feedforward convolutional codes ───────── */
+
+/* Distinct from aff3ct_viterbi_decoder_create because the trellis
+ * differs between RSC and feedforward codes. */
+aff3ct_decoder_t aff3ct_conv_viterbi_decoder_create(int K, int N,
+                                                     const int* poly, int poly_len);
+int  aff3ct_conv_viterbi_decode(aff3ct_decoder_t dec, const float* Y_N, int* V_K);
+void aff3ct_conv_viterbi_decoder_destroy(aff3ct_decoder_t dec);
+
 /* ── Turbo: encoder ──────────────────────────────────────────────── */
 
 /* interleaver_type: "LTE", "RANDOM", or "NO" (identity).

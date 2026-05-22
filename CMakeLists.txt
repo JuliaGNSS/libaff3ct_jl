@@ -47,6 +47,7 @@ add_library(aff3ct_jl SHARED
     src/ldpc.cpp
     src/turbo.cpp
     src/rsc.cpp
+    src/conv.cpp
 )
 
 target_include_directories(aff3ct_jl
