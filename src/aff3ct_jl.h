@@ -65,6 +65,7 @@ aff3ct_sparse_matrix_t aff3ct_sparse_matrix_load(const char* filepath,
                                                   unsigned int* info_bits_pos,
                                                   int info_bits_pos_len);
 
+int  aff3ct_sparse_matrix_info_bits_count(aff3ct_sparse_matrix_t mat);
 int  aff3ct_sparse_matrix_nrows(aff3ct_sparse_matrix_t mat);
 int  aff3ct_sparse_matrix_ncols(aff3ct_sparse_matrix_t mat);
 void aff3ct_sparse_matrix_destroy(aff3ct_sparse_matrix_t mat);
@@ -84,6 +85,28 @@ aff3ct_decoder_t aff3ct_ldpc_bp_decoder_create(int K, int N, int n_ite,
                                                 const unsigned int* info_bits_pos);
 int  aff3ct_ldpc_bp_decode(aff3ct_decoder_t dec, const float* Y_N, int* V_K);
 void aff3ct_ldpc_bp_decoder_destroy(aff3ct_decoder_t dec);
+
+/* ── RSC: encoder ───────────────────────────────────────────────── */
+
+/* Stand-alone RSC (Recursive Systematic Convolutional) encoder.
+ * Output is interleaved: [s0,p0,s1,p1,...,tail_s0,tail_p0,...].
+ * Trellis is always terminated (tail bits appended).
+ * poly: generator polynomial pair in octal, e.g. {05, 07}. Pass NULL for default {05,07}.
+ * poly_len: length of poly array (must be 2 if non-NULL). */
+aff3ct_encoder_t aff3ct_rsc_encoder_create(int K, int N,
+                                            const int* poly, int poly_len);
+int  aff3ct_rsc_encode(aff3ct_encoder_t enc, const int* U_K, int* X_N);
+void aff3ct_rsc_encoder_destroy(aff3ct_encoder_t enc);
+
+/* ── Viterbi: decoder ───────────────────────────────────────────── */
+
+/* Viterbi (SIHO) decoder for RSC codes.
+ * Expects interleaved LLRs matching RSC encoder output format.
+ * Uses same polynomial as the RSC encoder. */
+aff3ct_decoder_t aff3ct_viterbi_decoder_create(int K, int N,
+                                                const int* poly, int poly_len);
+int  aff3ct_viterbi_decode(aff3ct_decoder_t dec, const float* Y_N, int* V_K);
+void aff3ct_viterbi_decoder_destroy(aff3ct_decoder_t dec);
 
 /* ── Turbo: encoder ──────────────────────────────────────────────── */
 

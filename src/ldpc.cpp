@@ -40,20 +40,22 @@ aff3ct_sparse_matrix_t aff3ct_sparse_matrix_load(const char* filepath,
         auto w = new SparseMatrixWrapper();
         w->mat = LDPC_matrix_handler::read(std::string(filepath), &w->info_bits_pos);
 
-        // Report dimensions in standard LDPC convention: M = parity checks, N = codeword
+        // Report dimensions in standard LDPC convention: N = codeword
         int rows = (int)w->mat.get_n_rows();
         int cols = (int)w->mat.get_n_cols();
-        int M = std::min(rows, cols);
         int N = std::max(rows, cols);
-
-        if (out_M) *out_M = M;
-        if (out_N) *out_N = N;
 
         // If info_bits_pos wasn't populated by read(), compute it via identity transform
         if (w->info_bits_pos.empty()) {
             auto H_horiz = w->mat.turn(Sparse_matrix::Way::HORIZONTAL);
             LDPC_matrix_handler::transform_H_to_G_identity(H_horiz, w->info_bits_pos);
         }
+
+        // M = effective parity checks (rank-based, from info_bits_pos)
+        int M = N - (int)w->info_bits_pos.size();
+
+        if (out_M) *out_M = M;
+        if (out_N) *out_N = N;
 
         // Copy info_bits_pos to caller if requested
         if (info_bits_pos && info_bits_pos_len > 0) {
@@ -69,6 +71,12 @@ aff3ct_sparse_matrix_t aff3ct_sparse_matrix_load(const char* filepath,
         aff3ct_jl_set_error(e.what());
         return nullptr;
     }
+}
+
+int aff3ct_sparse_matrix_info_bits_count(aff3ct_sparse_matrix_t handle) {
+    if (!handle) return 0;
+    auto w = static_cast<SparseMatrixWrapper*>(handle);
+    return (int)w->info_bits_pos.size();
 }
 
 int aff3ct_sparse_matrix_nrows(aff3ct_sparse_matrix_t handle) {

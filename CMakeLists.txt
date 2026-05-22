@@ -46,6 +46,7 @@ add_library(aff3ct_jl SHARED
     src/polar.cpp
     src/ldpc.cpp
     src/turbo.cpp
+    src/rsc.cpp
 )
 
 target_include_directories(aff3ct_jl
